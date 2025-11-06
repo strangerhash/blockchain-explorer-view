@@ -277,32 +277,38 @@ export default function DocsPage() {
                      }`}>
                 <div className="mermaid" id="architecture-diagram">
 {`graph TB
-    A[User Enters Transaction Digest] --> B[Frontend: TransactionExplainer Component]
-    B --> C[API Route: /api/explain]
-    C --> D{Data Source Selection}
-    D -->|Primary| E[Blockberry API<br/>Raw Transactions]
-    D -->|Fallback| F[Hedera RPC Client<br/>@mysten/sui.js]
-    E --> G[Transaction Data Normalization]
-    F --> G
-    G --> H[Extract Sender Address]
-    H --> I[Fetch Account Names<br/>Blockberry Accounts API]
-    I --> J[Parse Transaction Details]
-    J --> K[Process Object Changes]
-    J --> L[Process Balance Changes]
-    J --> M[Extract Move Calls]
-    K --> N[Generate Human-Readable Summary]
-    L --> N
-    M --> N
-    N --> O{AI Enhancement?}
-    O -->|Yes + API Key| P[Google Gemini API<br/>Dynamic Model Discovery]
-    O -->|No| Q[Default Summary]
-    P --> R[Enhanced Summary + Insights + Risks]
-    Q --> S[Return Explanation]
+    A[User Enters Transaction Digest/Hash] --> B[Frontend: TransactionExplainer Component]
+    B --> C[Select Blockchain: Hedera or Sui]
+    C --> D[API Route: /api/explain]
+    D --> E{Blockchain Type?}
+    E -->|Hedera| F[Hedera Mirror Node API<br/>REST API]
+    E -->|Sui| G{Data Source}
+    G -->|Primary| H[Blockberry API<br/>Raw Transactions]
+    G -->|Fallback| I[Sui RPC Client<br/>@mysten/sui.js]
+    F --> J[Transaction Data Normalization]
+    H --> J
+    I --> J
+    J --> K[Extract Sender Address]
+    K --> L{Blockchain Type?}
+    L -->|Hedera| M[Fetch Account Names<br/>Hedera Mirror Node API]
+    L -->|Sui| N[Fetch Account Names<br/>Blockberry Accounts API]
+    M --> O[Parse Transaction Details]
+    N --> O
+    O --> P{Blockchain Type?}
+    P -->|Hedera| Q[Process HBAR Transfers<br/>Process Token Transfers/Burns]
+    P -->|Sui| R[Process Object Changes<br/>Process Balance Changes<br/>Extract Move Calls]
+    Q --> S[Generate Human-Readable Summary]
     R --> S
-    S --> T[Display on UI]
-    T --> U[Transaction Visualization]
-    T --> V[Balance Changes]
-    T --> W[Move Calls & Stats]
+    S --> T{AI Enhancement?}
+    T -->|Yes + API Key| U[Google Gemini API<br/>Dynamic Model Discovery]
+    T -->|No| V[Default Summary]
+    U --> W[Enhanced Summary + Insights + Risks]
+    V --> X[Return Explanation]
+    W --> X
+    X --> Y[Display on UI]
+    Y --> Z[Transaction Visualization]
+    Y --> AA[Balance Changes]
+    Y --> AB[Transaction Stats]
 `}
               </div>
             </div>
@@ -317,8 +323,9 @@ export default function DocsPage() {
                      }`}>
                 <li><strong>Frontend (Next.js 14):</strong> React-based user interface with TypeScript</li>
                 <li><strong>API Routes:</strong> Server-side endpoints for transaction processing</li>
-                <li><strong>Hedera Client SDK:</strong> Blockchain interaction via @mysten/sui.js</li>
-                <li><strong>Blockberry API:</strong> Primary data source for transactions and account information</li>
+                <li><strong>Hedera Mirror Node API:</strong> REST API for Hedera blockchain data</li>
+                <li><strong>Sui Client SDK:</strong> Blockchain interaction via @mysten/sui.js</li>
+                <li><strong>Blockberry API:</strong> Primary data source for Sui transactions and account information</li>
                 <li><strong>Google Gemini API:</strong> AI-powered explanation enhancement</li>
                 <li><strong>Tailwind CSS:</strong> Utility-first styling framework</li>
                 <li><strong>Mermaid.js:</strong> Diagram rendering for documentation</li>
@@ -345,7 +352,74 @@ export default function DocsPage() {
                    <div>
                      <h3 className={`text-xl font-semibold mb-4 transition-colors ${
                        darkMode ? 'text-white' : 'text-gray-900'
-                     }`}>Primary: Blockberry API</h3>
+                     }`}>Hedera: Mirror Node REST API</h3>
+                     <div className={`border rounded-lg p-5 transition-all duration-300 ${
+                       darkMode 
+                         ? 'bg-green-900/20 border-green-700/50' 
+                         : 'bg-green-50 border-green-200'
+                     }`}>
+                       <div className="space-y-3">
+                         <div>
+                           <p className={`font-semibold mb-2 transition-colors ${
+                             darkMode ? 'text-green-300' : 'text-green-900'
+                           }`}>Base URL:</p>
+                           <code className={`px-3 py-1 rounded text-sm transition-all duration-300 ${
+                             darkMode 
+                               ? 'bg-green-900/30 text-green-200' 
+                               : 'bg-green-100 text-green-900'
+                           }`}>
+                             https://mainnet-public.mirrornode.hedera.com
+                           </code>
+                         </div>
+                         <div>
+                           <p className={`font-semibold mb-2 transition-colors ${
+                             darkMode ? 'text-green-300' : 'text-green-900'
+                           }`}>Transaction Endpoint:</p>
+                           <code className={`px-3 py-1 rounded text-sm transition-all duration-300 ${
+                             darkMode 
+                               ? 'bg-green-900/30 text-green-200' 
+                               : 'bg-green-100 text-green-900'
+                           }`}>
+                             /api/v1/transactions/{'{id}'} or ?transactionhash={'{hash}'}
+                           </code>
+                         </div>
+                         <div>
+                           <p className={`font-semibold mb-2 transition-colors ${
+                             darkMode ? 'text-green-300' : 'text-green-900'
+                           }`}>Account Endpoint:</p>
+                           <code className={`px-3 py-1 rounded text-sm transition-all duration-300 ${
+                             darkMode 
+                               ? 'bg-green-900/30 text-green-200' 
+                               : 'bg-green-100 text-green-900'
+                           }`}>
+                             /api/v1/accounts/{'{id}'}
+                           </code>
+                         </div>
+                         <div>
+                           <p className={`font-semibold mb-2 transition-colors ${
+                             darkMode ? 'text-green-300' : 'text-green-900'
+                           }`}>Token Endpoint:</p>
+                           <code className={`px-3 py-1 rounded text-sm transition-all duration-300 ${
+                             darkMode 
+                               ? 'bg-green-900/30 text-green-200' 
+                               : 'bg-green-100 text-green-900'
+                           }`}>
+                             /api/v1/tokens/{'{id}'}
+                           </code>
+                         </div>
+                         <p className={`text-sm transition-colors ${
+                           darkMode ? 'text-green-200' : 'text-green-800'
+                         }`}>
+                           Public REST API for Hedera mainnet. Supports transaction IDs and transaction hashes.
+                         </p>
+                       </div>
+                     </div>
+                   </div>
+
+                   <div>
+                     <h3 className={`text-xl font-semibold mb-4 transition-colors ${
+                       darkMode ? 'text-white' : 'text-gray-900'
+                     }`}>Sui: Blockberry API (Primary)</h3>
                      <div className={`border rounded-lg p-5 transition-all duration-300 ${
                        darkMode 
                          ? 'bg-blue-900/20 border-blue-700/50' 
@@ -385,7 +459,7 @@ export default function DocsPage() {
                         ? 'bg-blue-900/30 text-blue-200' 
                         : 'bg-blue-100 text-blue-900'
                     }`}>
-                      X-API-Key: LqFsv1GGYsa7hcHvQye19fquqCWAh2
+                      X-API-Key: (default provided, can override via env)
                     </code>
                   </div>
                   <div>
@@ -416,7 +490,7 @@ export default function DocsPage() {
                    <div>
                      <h3 className={`text-xl font-semibold mb-4 transition-colors ${
                        darkMode ? 'text-white' : 'text-gray-900'
-                     }`}>Fallback: Hedera RPC</h3>
+                     }`}>Sui: RPC (Fallback)</h3>
                      <div className={`border rounded-lg p-5 transition-all duration-300 ${
                        darkMode 
                          ? 'bg-gray-900/50 border-gray-700/50' 
@@ -556,30 +630,45 @@ export default function DocsPage() {
     participant User
     participant Frontend
     participant API
+    participant HederaAPI
     participant Blockberry
-    participant HederaRPC
+    participant SuiRPC
     participant Analysis
     participant Gemini
     
-    User->>Frontend: Enter Transaction Digest
-    Frontend->>API: POST /api/explain
-    API->>Blockberry: Fetch Raw Transaction
-    alt Blockberry API Success
-        Blockberry-->>API: Transaction Data
-    else Blockberry API Fails
-        API->>HederaRPC: Fallback: RPC Call
-        HederaRPC-->>API: Transaction Data
+    User->>Frontend: Enter Transaction Digest/Hash
+    User->>Frontend: Select Blockchain (Hedera/Sui)
+    Frontend->>API: POST /api/explain<br/>{digest, blockchain}
+    
+    alt Blockchain = Hedera
+        API->>HederaAPI: Fetch Transaction<br/>(Mirror Node API)
+        HederaAPI-->>API: Transaction Data
+        API->>HederaAPI: Fetch Account Names
+        HederaAPI-->>API: Account Name Mapping
+        API->>HederaAPI: Fetch Token Info
+        HederaAPI-->>API: Token Metadata
+        API->>Analysis: explainHederaTransaction()
+        Analysis->>Analysis: Process HBAR Transfers
+        Analysis->>Analysis: Process Token Transfers/Burns
+        Analysis->>Analysis: Generate Summary
+    else Blockchain = Sui
+        API->>Blockberry: Fetch Raw Transaction
+        alt Blockberry API Success
+            Blockberry-->>API: Transaction Data
+        else Blockberry API Fails
+            API->>SuiRPC: Fallback: RPC Call
+            SuiRPC-->>API: Transaction Data
+        end
+        API->>Blockberry: Fetch Account Names<br/>(Sender & Receivers)
+        Blockberry-->>API: Account Name Mapping
+        API->>Analysis: explainTransaction()
+        Analysis->>Analysis: Parse Object Changes
+        Analysis->>Analysis: Process Balance Changes<br/>(Group by Account)
+        Analysis->>Analysis: Extract Move Calls
+        Analysis->>Analysis: Calculate Gas Usage
+        Analysis->>Analysis: Generate Summary<br/>(with Account Names)
     end
     
-    API->>Blockberry: Fetch Account Names<br/>(Sender & Receivers)
-    Blockberry-->>API: Account Name Mapping
-    
-    API->>Analysis: explainTransaction()
-    Analysis->>Analysis: Parse Object Changes
-    Analysis->>Analysis: Process Balance Changes<br/>(Group by Account)
-    Analysis->>Analysis: Extract Move Calls
-    Analysis->>Analysis: Calculate Gas Usage
-    Analysis->>Analysis: Generate Summary<br/>(with Account Names)
     Analysis-->>API: Transaction Explanation
     
     alt AI Enhancement Enabled
@@ -662,7 +751,8 @@ npm install
 # 2. Configure environment variables (optional)
 # Create .env.local file:
 GOOGLE_GEMINI_API_KEY=your_gemini_key_here
-BLOCKBERRY_API_KEY=LqFsv1GGYsa7hcHvQye19fquqCWAh2
+HEDERA_API_KEY=your_hedera_key_here
+BLOCKBERRY_API_KEY=your_blockberry_key_here
 NEXT_PUBLIC_SUI_RPC_URL=https://fullnode.mainnet.sui.io:443
 
 # 3. Run development server
@@ -690,7 +780,8 @@ npm run dev
                     <pre>{`curl -X POST http://localhost:3000/api/explain \\
   -H "Content-Type: application/json" \\
   -d '{
-    "digest": "FfW4z5gxwoXnUj5HP3d9qmUEsXWYBVjrCwzpvmzbgUhM",
+    "digest": "0.0.123@1234567890.123456789",
+    "blockchain": "hedera",
     "useAI": true
   }'`}</pre>
                   </div>
@@ -704,7 +795,7 @@ npm run dev
                              ? 'bg-gray-900 text-green-400' 
                              : 'bg-gray-900 text-green-400'
                          }`}>
-                    <pre>{`curl "http://localhost:3000/api/explain?digest=FfW4z5gxwoXnUj5HP3d9qmUEsXWYBVjrCwzpvmzbgUhM&useAI=true"`}</pre>
+                    <pre>{`curl "http://localhost:3000/api/explain?digest=0.0.123@1234567890.123456789&blockchain=hedera&useAI=true"`}</pre>
                   </div>
                 </div>
                        <div className={`border rounded-lg p-4 transition-all duration-300 ${
@@ -719,9 +810,9 @@ npm run dev
                            darkMode ? 'text-blue-200' : 'text-blue-900'
                          }`}>{`{
   "success": true,
-  "digest": "FfW4z5gxwoXnUj5HP3d9qmUEsXWYBVjrCwzpvmzbgUhM",
+  "digest": "0.0.123@1234567890.123456789",
   "explanation": {
-    "summary": "Account Name (0x123...) exchanged 0.5 HBAR for 100 tokens...",
+    "summary": "Account Name (0.0.123...) transferred 100 HBAR to 0.0.456...",
     "gasUsed": "0.005 HBAR",
     "totalGasCost": "0.00532509 HBAR",
     "objectsCreated": 0,
@@ -758,8 +849,20 @@ npm run dev
                        darkMode ? 'text-gray-300' : 'text-gray-700'
                      }`}>
                 <li>Open the application in your browser</li>
-                <li>Enter a Hedera transaction digest (e.g., from Hedera Explorer)</li>
-                <li>Click "Explain" or press Enter</li>
+                <li>Select your blockchain (Hedera or Sui) using the toggle buttons</li>
+                <li>Enter a transaction digest or hash:
+                  <ul className={`list-disc list-inside ml-4 mt-2 space-y-1 transition-colors ${
+                    darkMode ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    <li><strong>Hedera:</strong> Transaction ID (e.g., <code className={`px-1 rounded transition-all duration-300 ${
+                      darkMode ? 'bg-gray-800 text-gray-200' : 'bg-gray-100'
+                    }`}>0.0.123@1234567890.123456789</code>) or transaction hash</li>
+                    <li><strong>Sui:</strong> Transaction digest (e.g., <code className={`px-1 rounded transition-all duration-300 ${
+                      darkMode ? 'bg-gray-800 text-gray-200' : 'bg-gray-100'
+                    }`}>0x1234...</code>)</li>
+                  </ul>
+                </li>
+                <li>Click "Explain Transaction" or press Enter</li>
                 <li>View the human-readable explanation with visualizations</li>
                 <li>Use "Explain Another Transaction" to analyze more transactions</li>
                 <li>Copy addresses/hashes using the copy icon for investigation</li>

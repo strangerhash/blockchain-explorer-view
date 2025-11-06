@@ -4,15 +4,18 @@ A web application that explains blockchain transactions in plain language, makin
 
 ## Features
 
+- ✅ **Multi-Blockchain Support**: Hedera and Sui blockchains
 - ✅ Accepts transaction digest (hash) or transaction link
-- ✅ Fetches transaction details from Sui RPC
-- ✅ Human-readable summaries (e.g., "Alice transferred 100 SUI to Bob")
+- ✅ Fetches transaction details from Hedera Mirror Node API or Sui RPC
+- ✅ Human-readable summaries (e.g., "Alice transferred 100 HBAR/SUI to Bob")
 - ✅ **AI-Enhanced Explanations** using Google Gemini (free tier)
 - ✅ AI-powered insights and risk analysis
 - ✅ Tracks object creation, transfer, and mutation
-- ✅ Displays gas usage in SUI
+- ✅ Displays gas usage in HBAR or SUI
 - ✅ Visual flow diagrams showing transaction flow
-- ✅ Move call identification and labeling
+- ✅ Move call identification and labeling (Sui)
+- ✅ Token transfer and burn detection (Hedera)
+- ✅ Blockchain selector toggle in UI
 - ✅ "Explain Another Transaction" button for quick iteration
 - ✅ Copy-to-clipboard functionality
 - ✅ Professional documentation page
@@ -21,7 +24,9 @@ A web application that explains blockchain transactions in plain language, makin
 
 ### Tech Stack
 - **Frontend**: Next.js 14 (React), TypeScript, Tailwind CSS
-- **Blockchain**: Sui blockchain SDK (@mysten/sui.js)
+- **Blockchains**: 
+  - **Hedera**: Hedera Mirror Node REST API
+  - **Sui**: Sui blockchain SDK (@mysten/sui.js) and Blockberry API
 - **AI**: Google Gemini API (@google/generative-ai) - Free tier available
 - **API**: Next.js API Routes
 
@@ -37,7 +42,8 @@ A web application that explains blockchain transactions in plain language, makin
 │   ├── TransactionExplainer.tsx    # Main UI component
 │   └── TransactionVisualization.tsx # Flow visualization
 ├── lib/
-│   ├── sui-client.ts       # Sui RPC client and transaction analysis
+│   ├── hedera-client.ts     # Hedera Mirror Node API client and transaction analysis
+│   ├── sui-client.ts        # Sui RPC client and transaction analysis
 │   └── genai-service.ts     # Google Gemini AI integration
 ├── app/
 │   └── docs/               # Professional documentation page
@@ -48,7 +54,7 @@ A web application that explains blockchain transactions in plain language, makin
 
 ### Prerequisites
 - Node.js 18+ and npm/yarn
-- Access to Sui RPC endpoint (defaults to mainnet)
+- Access to Hedera Mirror Node API (public endpoint) or Sui RPC endpoint (defaults to mainnet)
 
 ### Installation
 
@@ -63,6 +69,8 @@ npm install
 cp .env.example .env.local
 
 # Edit .env.local and add:
+# HEDERA_API_KEY=your_hedera_key_here (optional, defaults provided)
+# BLOCKBERRY_API_KEY=your_blockberry_key_here (optional, defaults provided)
 # NEXT_PUBLIC_SUI_RPC_URL=https://fullnode.mainnet.sui.io:443 (optional)
 # GOOGLE_GEMINI_API_KEY=your_key_here (optional, for AI features)
 ```
@@ -82,20 +90,25 @@ npm run dev
 
 ## Usage
 
-1. Enter a transaction digest (e.g., `0x1234...`) in the input field
-2. Click "Explain Transaction" or press Enter
-3. View the human-readable summary and visualization
-4. Use "Explain Another Transaction" to analyze more transactions
+1. Select your blockchain (Hedera or Sui) using the toggle buttons
+2. Enter a transaction digest or hash:
+   - **Hedera**: Transaction ID (e.g., `0.0.123@1234567890.123456789`) or transaction hash
+   - **Sui**: Transaction digest (e.g., `0x1234...`)
+3. Click "Explain Transaction" or press Enter
+4. View the human-readable summary and visualization
+5. Use "Explain Another Transaction" to analyze more transactions
 
 ## API
 
 ### POST /api/explain
-Explains a transaction by digest.
+Explains a transaction by digest or hash.
 
 **Request:**
 ```json
 {
-  "digest": "0x1234..."
+  "digest": "0x1234...",
+  "blockchain": "hedera" | "sui",
+  "useAI": true
 }
 ```
 
@@ -118,13 +131,23 @@ Explains a transaction by digest.
 }
 ```
 
-### GET /api/explain?digest=0x1234...
-Same as POST but with query parameter.
+### GET /api/explain?digest=0x1234...&blockchain=hedera|sui
+Same as POST but with query parameters.
 
-## Data Source
+## Data Sources
 
-- **Primary**: Sui RPC API (mainnet/testnet)
+### Hedera
+- **Primary**: Hedera Mirror Node REST API (https://mainnet-public.mirrornode.hedera.com)
+- **Transaction Data**: Fetched via `/api/v1/transactions/{id}` or `/api/v1/transactions?transactionhash={hash}`
+- **Account Data**: Fetched via `/api/v1/accounts/{id}`
+- **Token Data**: Fetched via `/api/v1/tokens/{id}`
+- **Analysis**: Local processing of transfers, token transfers, and transaction metadata
+
+### Sui
+- **Primary**: Blockberry API (https://api.blockberry.one/sui/v1/raw-transactions/{digest})
+- **Fallback**: Sui RPC API (https://fullnode.mainnet.sui.io:443)
 - **Transaction Data**: Fetched via `sui_getTransactionBlock` with full options
+- **Account Data**: Fetched via Blockberry Accounts API
 - **Analysis**: Local processing of transaction effects, object changes, and balance changes
 
 ## Deployment
@@ -197,7 +220,8 @@ This feature fits best in a GenAI platform because:
 
 ## Future Enhancements
 
-- [ ] Multi-chain support (Ethereum, Solana, etc.)
+- [x] Multi-chain support (Hedera, Sui)
+- [ ] Additional blockchain support (Ethereum, Solana, etc.)
 - [ ] LLM-powered explanations for complex transactions
 - [ ] Transaction comparison feature
 - [ ] Export explanations (PDF, JSON)
