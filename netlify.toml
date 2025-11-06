@@ -1,0 +1,16 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_FLAGS = "--legacy-peer-deps"
+
+# Note: Function timeout is configured per-function in Netlify dashboard
+# Default timeout is 10s, can be increased to 26s (free) or 60s (pro) in dashboard
+
+# Next.js plugin handles all routing automatically
+
